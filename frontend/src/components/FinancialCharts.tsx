@@ -36,14 +36,14 @@ const titleStyle = {
 export function RevenueChart({ data }: { data: FinancialStatement[] }) {
   const chartData = data.map((s) => ({
     year: s.year,
-    Revenue: s.revenue,
-    'Gross Profit': s.gross_profit,
-    'Net Income': s.net_income,
+    '매출액': s.revenue,
+    '매출총이익': s.gross_profit,
+    '순이익': s.net_income,
   }));
 
   return (
     <div style={cardStyle}>
-      <div style={titleStyle}>Revenue, Gross Profit & Net Income</div>
+      <div style={titleStyle}>매출액, 매출총이익 & 순이익</div>
       <ResponsiveContainer width="100%" height={300}>
         <ComposedChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -55,9 +55,9 @@ export function RevenueChart({ data }: { data: FinancialStatement[] }) {
             formatter={(v: number) => fmt(v)}
           />
           <Legend />
-          <Bar dataKey="Revenue" fill="var(--accent-blue)" opacity={0.7} />
-          <Bar dataKey="Gross Profit" fill="var(--accent-purple)" opacity={0.7} />
-          <Line dataKey="Net Income" stroke="var(--accent-green)" strokeWidth={2} dot={{ r: 3 }} />
+          <Bar dataKey="매출액" fill="var(--accent-blue)" opacity={0.7} />
+          <Bar dataKey="매출총이익" fill="var(--accent-purple)" opacity={0.7} />
+          <Line dataKey="순이익" stroke="var(--accent-green)" strokeWidth={2} dot={{ r: 3 }} />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
@@ -67,15 +67,15 @@ export function RevenueChart({ data }: { data: FinancialStatement[] }) {
 export function MarginsChart({ data }: { data: FinancialMetrics[] }) {
   const chartData = data.map((m) => ({
     year: m.year,
-    'Gross Margin': m.gross_margin ? +(m.gross_margin * 100).toFixed(1) : null,
-    'Operating Margin': m.operating_margin ? +(m.operating_margin * 100).toFixed(1) : null,
-    'Net Margin': m.net_margin ? +(m.net_margin * 100).toFixed(1) : null,
-    'FCF Margin': m.fcf_margin ? +(m.fcf_margin * 100).toFixed(1) : null,
+    '매출총이익률': m.gross_margin ? +(m.gross_margin * 100).toFixed(1) : null,
+    '영업이익률': m.operating_margin ? +(m.operating_margin * 100).toFixed(1) : null,
+    '순이익률': m.net_margin ? +(m.net_margin * 100).toFixed(1) : null,
+    'FCF 마진': m.fcf_margin ? +(m.fcf_margin * 100).toFixed(1) : null,
   }));
 
   return (
     <div style={cardStyle}>
-      <div style={titleStyle}>Profitability Margins (%)</div>
+      <div style={titleStyle}>수익성 지표 (%)</div>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -86,10 +86,10 @@ export function MarginsChart({ data }: { data: FinancialMetrics[] }) {
             formatter={(v: number) => `${v}%`}
           />
           <Legend />
-          <Line dataKey="Gross Margin" stroke="var(--accent-blue)" strokeWidth={2} dot={{ r: 3 }} />
-          <Line dataKey="Operating Margin" stroke="var(--accent-purple)" strokeWidth={2} dot={{ r: 3 }} />
-          <Line dataKey="Net Margin" stroke="var(--accent-green)" strokeWidth={2} dot={{ r: 3 }} />
-          <Line dataKey="FCF Margin" stroke="var(--accent-yellow)" strokeWidth={2} dot={{ r: 3 }} strokeDasharray="5 5" />
+          <Line dataKey="매출총이익률" stroke="var(--accent-blue)" strokeWidth={2} dot={{ r: 3 }} />
+          <Line dataKey="영업이익률" stroke="var(--accent-purple)" strokeWidth={2} dot={{ r: 3 }} />
+          <Line dataKey="순이익률" stroke="var(--accent-green)" strokeWidth={2} dot={{ r: 3 }} />
+          <Line dataKey="FCF 마진" stroke="var(--accent-yellow)" strokeWidth={2} dot={{ r: 3 }} strokeDasharray="5 5" />
         </LineChart>
       </ResponsiveContainer>
     </div>
@@ -106,7 +106,7 @@ export function ReturnsChart({ data }: { data: FinancialMetrics[] }) {
 
   return (
     <div style={cardStyle}>
-      <div style={titleStyle}>Return Metrics (%)</div>
+      <div style={titleStyle}>수익률 지표 (%)</div>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -129,14 +129,14 @@ export function ReturnsChart({ data }: { data: FinancialMetrics[] }) {
 export function CashFlowChart({ data }: { data: FinancialStatement[] }) {
   const chartData = data.map((s) => ({
     year: s.year,
-    'Operating CF': s.operating_cash_flow,
-    CAPEX: s.capital_expenditure ? Math.abs(s.capital_expenditure) : null,
-    FCF: s.free_cash_flow,
+    '영업현금흐름': s.operating_cash_flow,
+    '설비투자': s.capital_expenditure ? Math.abs(s.capital_expenditure) : null,
+    '잉여현금흐름': s.free_cash_flow,
   }));
 
   return (
     <div style={cardStyle}>
-      <div style={titleStyle}>Cash Flow Analysis</div>
+      <div style={titleStyle}>현금흐름 분석</div>
       <ResponsiveContainer width="100%" height={300}>
         <ComposedChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -147,9 +147,9 @@ export function CashFlowChart({ data }: { data: FinancialStatement[] }) {
             formatter={(v: number) => fmt(v)}
           />
           <Legend />
-          <Area dataKey="Operating CF" fill="var(--accent-blue)" fillOpacity={0.2} stroke="var(--accent-blue)" strokeWidth={2} />
-          <Bar dataKey="CAPEX" fill="var(--accent-red)" opacity={0.5} />
-          <Line dataKey="FCF" stroke="var(--accent-green)" strokeWidth={2} dot={{ r: 4 }} />
+          <Area dataKey="영업현금흐름" fill="var(--accent-blue)" fillOpacity={0.2} stroke="var(--accent-blue)" strokeWidth={2} />
+          <Bar dataKey="설비투자" fill="var(--accent-red)" opacity={0.5} />
+          <Line dataKey="잉여현금흐름" stroke="var(--accent-green)" strokeWidth={2} dot={{ r: 4 }} />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
@@ -159,15 +159,15 @@ export function CashFlowChart({ data }: { data: FinancialStatement[] }) {
 export function BalanceSheetChart({ data }: { data: FinancialStatement[] }) {
   const chartData = data.map((s) => ({
     year: s.year,
-    'Total Assets': s.total_assets,
-    'Total Debt': s.total_debt,
-    Equity: s.total_equity,
-    Cash: s.cash_and_equivalents,
+    '총자산': s.total_assets,
+    '총부채': s.total_debt,
+    '자본': s.total_equity,
+    '현금': s.cash_and_equivalents,
   }));
 
   return (
     <div style={cardStyle}>
-      <div style={titleStyle}>Balance Sheet Overview</div>
+      <div style={titleStyle}>재무상태표 개요</div>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -178,14 +178,83 @@ export function BalanceSheetChart({ data }: { data: FinancialStatement[] }) {
             formatter={(v: number) => fmt(v)}
           />
           <Legend />
-          <Bar dataKey="Total Assets" fill="var(--accent-blue)" opacity={0.6} />
-          <Bar dataKey="Equity" fill="var(--accent-green)" opacity={0.6} />
-          <Bar dataKey="Total Debt" fill="var(--accent-red)" opacity={0.6} />
-          <Bar dataKey="Cash" fill="var(--accent-yellow)" opacity={0.6} />
+          <Bar dataKey="총자산" fill="var(--accent-blue)" opacity={0.6} />
+          <Bar dataKey="자본" fill="var(--accent-green)" opacity={0.6} />
+          <Bar dataKey="총부채" fill="var(--accent-red)" opacity={0.6} />
+          <Bar dataKey="현금" fill="var(--accent-yellow)" opacity={0.6} />
         </BarChart>
       </ResponsiveContainer>
     </div>
   );
+}
+
+function downloadCSV(statements: FinancialStatement[], metrics: FinancialMetrics[], currency: string) {
+  const allRows = [
+    // 손익계산서
+    { label: '[ 손익계산서 ]', key: 'header' },
+    { label: `매출액 (${currency})`, key: 'revenue', format: 'num' },
+    { label: '매출원가', key: 'cost_of_revenue', format: 'num' },
+    { label: '매출총이익', key: 'gross_profit', format: 'num' },
+    { label: '영업이익', key: 'operating_income', format: 'num' },
+    { label: 'EBITDA', key: 'ebitda', format: 'num' },
+    { label: '감가상각비', key: 'depreciation', format: 'num' },
+    { label: '이자비용', key: 'interest_expense', format: 'num' },
+    { label: '법인세비용', key: 'tax_expense', format: 'num' },
+    { label: '순이익', key: 'net_income', format: 'num' },
+    { label: 'EPS', key: 'eps', format: 'num' },
+    // 재무상태표
+    { label: '[ 재무상태표 ]', key: 'header2' },
+    { label: '총자산', key: 'total_assets', format: 'num' },
+    { label: '총부채', key: 'total_liabilities', format: 'num' },
+    { label: '자본총계', key: 'total_equity', format: 'num' },
+    { label: '총차입금', key: 'total_debt', format: 'num' },
+    { label: '현금및현금성자산', key: 'cash_and_equivalents', format: 'num' },
+    { label: '발행주식수', key: 'shares_outstanding', format: 'num' },
+    // 현금흐름표
+    { label: '[ 현금흐름표 ]', key: 'header3' },
+    { label: '영업현금흐름', key: 'operating_cash_flow', format: 'num' },
+    { label: '설비투자(CAPEX)', key: 'capital_expenditure', format: 'num' },
+    { label: '잉여현금흐름(FCF)', key: 'free_cash_flow', format: 'num' },
+    { label: '배당금지급', key: 'dividends_paid', format: 'num' },
+    // 주요 지표
+    { label: '[ 주요 재무지표 ]', key: 'header4' },
+    { label: '매출총이익률', key: 'gross_margin', format: 'pct', metric: true },
+    { label: '영업이익률', key: 'operating_margin', format: 'pct', metric: true },
+    { label: '순이익률', key: 'net_margin', format: 'pct', metric: true },
+    { label: 'ROE', key: 'roe', format: 'pct', metric: true },
+    { label: 'ROA', key: 'roa', format: 'pct', metric: true },
+    { label: 'ROIC', key: 'roic', format: 'pct', metric: true },
+    { label: 'D/E 비율', key: 'debt_to_equity', format: 'ratio', metric: true },
+    { label: '이자보상배율', key: 'interest_coverage', format: 'ratio', metric: true },
+    { label: '매출 성장률', key: 'revenue_growth', format: 'pct', metric: true },
+    { label: '순이익 성장률', key: 'earnings_growth', format: 'pct', metric: true },
+    { label: 'FCF 마진', key: 'fcf_margin', format: 'pct', metric: true },
+  ];
+
+  const header = ['항목', ...statements.map(s => s.year.toString())].join(',');
+  const rows = allRows.map(row => {
+    if (row.key.startsWith('header')) {
+      return row.label;
+    }
+    const values = statements.map((s, i) => {
+      const source = (row as any).metric ? metrics[i] : s;
+      const val = source ? (source as any)[row.key] : null;
+      if (val === null || val === undefined) return '';
+      if (row.format === 'pct') return (val * 100).toFixed(1) + '%';
+      if (row.format === 'ratio') return val.toFixed(2);
+      return val.toString();
+    });
+    return [row.label, ...values].join(',');
+  });
+
+  const csv = '\uFEFF' + [header, ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `financial_data_${statements[0]?.year || ''}_${statements[statements.length-1]?.year || ''}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 export function FinancialTable({ statements, metrics, currency }: {
@@ -193,20 +262,56 @@ export function FinancialTable({ statements, metrics, currency }: {
   metrics: FinancialMetrics[];
   currency: string;
 }) {
-  const rows = [
-    { label: `Revenue (${currency})`, key: 'revenue', format: fmt },
-    { label: `Gross Profit`, key: 'gross_profit', format: fmt },
-    { label: `Operating Income`, key: 'operating_income', format: fmt },
-    { label: `Net Income`, key: 'net_income', format: fmt },
-    { label: `EBITDA`, key: 'ebitda', format: fmt },
-    { label: `FCF`, key: 'free_cash_flow', format: fmt },
-    { label: '', key: 'divider', format: () => '' },
-    { label: 'Gross Margin', key: 'gross_margin', format: pct, metric: true },
-    { label: 'Operating Margin', key: 'operating_margin', format: pct, metric: true },
-    { label: 'Net Margin', key: 'net_margin', format: pct, metric: true },
+  type RowDef = { label: string; key: string; format: (v: any) => string; metric?: boolean; section?: boolean };
+
+  const sectionHeader = (label: string): RowDef => ({
+    label, key: `section_${label}`, format: () => '', section: true,
+  });
+
+  const rows: RowDef[] = [
+    // 손익계산서
+    sectionHeader('손익계산서'),
+    { label: `매출액 (${currency})`, key: 'revenue', format: fmt },
+    { label: '매출원가', key: 'cost_of_revenue', format: fmt },
+    { label: '매출총이익', key: 'gross_profit', format: fmt },
+    { label: '영업이익', key: 'operating_income', format: fmt },
+    { label: 'EBITDA', key: 'ebitda', format: fmt },
+    { label: '감가상각비', key: 'depreciation', format: fmt },
+    { label: '이자비용', key: 'interest_expense', format: fmt },
+    { label: '법인세비용', key: 'tax_expense', format: fmt },
+    { label: '순이익', key: 'net_income', format: fmt },
+    { label: 'EPS', key: 'eps', format: (v: number | null) => v !== null ? v.toLocaleString(undefined, { maximumFractionDigits: 0 }) : 'N/A' },
+
+    // 재무상태표
+    sectionHeader('재무상태표'),
+    { label: '총자산', key: 'total_assets', format: fmt },
+    { label: '총부채', key: 'total_liabilities', format: fmt },
+    { label: '자본총계', key: 'total_equity', format: fmt },
+    { label: '총차입금', key: 'total_debt', format: fmt },
+    { label: '현금및현금성자산', key: 'cash_and_equivalents', format: fmt },
+    { label: '발행주식수', key: 'shares_outstanding', format: fmt },
+
+    // 현금흐름표
+    sectionHeader('현금흐름표'),
+    { label: '영업현금흐름', key: 'operating_cash_flow', format: fmt },
+    { label: '설비투자(CAPEX)', key: 'capital_expenditure', format: fmt },
+    { label: '잉여현금흐름(FCF)', key: 'free_cash_flow', format: fmt },
+    { label: '배당금지급', key: 'dividends_paid', format: fmt },
+
+    // 주요 지표
+    sectionHeader('주요 재무지표'),
+    { label: '매출총이익률', key: 'gross_margin', format: pct, metric: true },
+    { label: '영업이익률', key: 'operating_margin', format: pct, metric: true },
+    { label: '순이익률', key: 'net_margin', format: pct, metric: true },
     { label: 'ROE', key: 'roe', format: pct, metric: true },
-    { label: 'D/E Ratio', key: 'debt_to_equity', format: (v: number | null) => v !== null ? `${v.toFixed(2)}x` : 'N/A', metric: true },
-    { label: 'Rev Growth', key: 'revenue_growth', format: pct, metric: true },
+    { label: 'ROA', key: 'roa', format: pct, metric: true },
+    { label: 'ROIC', key: 'roic', format: pct, metric: true },
+    { label: 'D/E 비율', key: 'debt_to_equity', format: (v: number | null) => v !== null ? `${v.toFixed(2)}x` : 'N/A', metric: true },
+    { label: '이자보상배율', key: 'interest_coverage', format: (v: number | null) => v !== null ? `${v.toFixed(1)}x` : 'N/A', metric: true },
+    { label: '총자산회전율', key: 'asset_turnover', format: (v: number | null) => v !== null ? `${v.toFixed(2)}x` : 'N/A', metric: true },
+    { label: '매출 성장률', key: 'revenue_growth', format: pct, metric: true },
+    { label: '순이익 성장률', key: 'earnings_growth', format: pct, metric: true },
+    { label: 'FCF 마진', key: 'fcf_margin', format: pct, metric: true },
   ];
 
   const thStyle = {
@@ -231,11 +336,23 @@ export function FinancialTable({ statements, metrics, currency }: {
 
   return (
     <div style={{ ...cardStyle, overflow: 'auto' }}>
-      <div style={titleStyle}>Financial Data Table</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <div style={titleStyle as any}>재무 데이터 테이블</div>
+        <button
+          onClick={() => downloadCSV(statements, metrics, currency)}
+          style={{
+            padding: '8px 16px', background: 'var(--accent-green)',
+            color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)',
+            fontSize: 13, fontWeight: 600, cursor: 'pointer',
+          }}
+        >
+          엑셀 다운로드
+        </button>
+      </div>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
-            <th style={{ ...thStyle, textAlign: 'left', position: 'sticky', left: 0, zIndex: 1 }}>Metric</th>
+            <th style={{ ...thStyle, textAlign: 'left', position: 'sticky', left: 0, zIndex: 1 }}>항목</th>
             {statements.map((s) => (
               <th key={s.year} style={thStyle}>{s.year}</th>
             ))}
@@ -243,10 +360,19 @@ export function FinancialTable({ statements, metrics, currency }: {
         </thead>
         <tbody>
           {rows.map((row) => {
-            if (row.key === 'divider') {
+            if (row.section) {
               return (
-                <tr key="divider">
-                  <td colSpan={statements.length + 1} style={{ padding: 4, borderBottom: '2px solid var(--border-light)' }} />
+                <tr key={row.key}>
+                  <td
+                    colSpan={statements.length + 1}
+                    style={{
+                      padding: '12px 12px 6px', fontWeight: 700, fontSize: 13,
+                      color: 'var(--accent-blue)', borderBottom: '2px solid var(--border)',
+                      background: 'var(--bg-card)', position: 'sticky' as const, left: 0,
+                    }}
+                  >
+                    {row.label}
+                  </td>
                 </tr>
               );
             }
@@ -259,7 +385,7 @@ export function FinancialTable({ statements, metrics, currency }: {
                   {row.label}
                 </td>
                 {statements.map((s, i) => {
-                  const source = (row as any).metric ? metrics[i] : s;
+                  const source = row.metric ? metrics[i] : s;
                   const val = source ? (source as any)[row.key] : null;
                   const formatted = row.format(val);
                   const isNeg = val !== null && val < 0;

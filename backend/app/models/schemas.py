@@ -100,6 +100,36 @@ class SWOTAnalysis(BaseModel):
     summary: str
 
 
+class InvestmentAnalysisItem(BaseModel):
+    title: str
+    content: str
+    details: list[str] = []
+
+
+class PriceScenario(BaseModel):
+    name: str
+    target_price: float
+    reasoning: str
+
+
+class TargetPriceAnalysis(BaseModel):
+    current_price: float
+    target_price: float
+    upside_pct: float
+    methodology: str
+    assumptions: list[str]
+    scenarios: list[PriceScenario]
+
+
+class InvestmentAnalysis(BaseModel):
+    investment_thesis: list[InvestmentAnalysisItem]
+    key_catalysts: list[InvestmentAnalysisItem]
+    target_price: TargetPriceAnalysis
+    key_risks: list[InvestmentAnalysisItem]
+    summary: str
+    recommendation: str
+
+
 class DCFAssumption(BaseModel):
     parameter: str
     value: float

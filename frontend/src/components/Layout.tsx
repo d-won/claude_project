@@ -50,7 +50,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     <div>
       <header style={styles.header}>
         <Link to="/" style={styles.logo}>
-          Financial Analysis Platform
+          글로벌 재무분석 플랫폼
         </Link>
         <nav style={styles.nav}>
           <Link
@@ -61,7 +61,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               borderBottomColor: isHome ? 'var(--accent-blue)' : undefined,
             }}
           >
-            Search
+            검색
           </Link>
         </nav>
       </header>

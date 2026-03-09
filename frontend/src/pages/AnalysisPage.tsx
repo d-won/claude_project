@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getFinancials, getSWOT, getDCF } from '../services/api';
+import { getFinancials, getInvestmentAnalysis, getDCF } from '../services/api';
 import type {
   CompanyInfo, FinancialStatement, FinancialMetrics,
-  SWOTAnalysis, DCFResult,
+  InvestmentAnalysis, DCFResult,
 } from '../types';
 import {
   RevenueChart, MarginsChart, ReturnsChart,
   CashFlowChart, BalanceSheetChart, FinancialTable,
 } from '../components/FinancialCharts';
-import SWOTView from '../components/SWOTView';
+import InvestmentAnalysisView from '../components/InvestmentAnalysisView';
 import DCFView from '../components/DCFView';
 
-type Tab = 'financials' | 'swot' | 'dcf';
+type Tab = 'financials' | 'investment' | 'dcf';
 
 export default function AnalysisPage() {
   const { ticker } = useParams<{ ticker: string }>();
@@ -22,11 +22,11 @@ export default function AnalysisPage() {
   const [company, setCompany] = useState<CompanyInfo | null>(null);
   const [statements, setStatements] = useState<FinancialStatement[]>([]);
   const [metrics, setMetrics] = useState<FinancialMetrics[]>([]);
-  const [swot, setSWOT] = useState<SWOTAnalysis | null>(null);
+  const [investmentAnalysis, setInvestmentAnalysis] = useState<InvestmentAnalysis | null>(null);
   const [dcf, setDCF] = useState<DCFResult | null>(null);
 
   const [loadingFin, setLoadingFin] = useState(false);
-  const [loadingSwot, setLoadingSwot] = useState(false);
+  const [loadingInvestment, setLoadingInvestment] = useState(false);
   const [loadingDcf, setLoadingDcf] = useState(false);
   const [error, setError] = useState('');
 
@@ -51,22 +51,22 @@ export default function AnalysisPage() {
       setStatements(data.statements);
       setMetrics(data.metrics);
     } catch (e: any) {
-      setError(e?.response?.data?.detail || 'Failed to load financial data');
+      setError(e?.response?.data?.detail || '재무 데이터를 불러오지 못했습니다');
     } finally {
       setLoadingFin(false);
     }
   };
 
-  const loadSWOT = async () => {
+  const loadInvestment = async () => {
     if (!ticker) return;
-    setLoadingSwot(true);
+    setLoadingInvestment(true);
     try {
-      const data = await getSWOT(ticker, years);
-      setSWOT(data.swot);
+      const data = await getInvestmentAnalysis(ticker, years);
+      setInvestmentAnalysis(data.analysis);
     } catch (e: any) {
-      setError(e?.response?.data?.detail || 'Failed to generate SWOT analysis');
+      setError(e?.response?.data?.detail || '투자 분석을 생성하지 못했습니다');
     } finally {
-      setLoadingSwot(false);
+      setLoadingInvestment(false);
     }
   };
 
@@ -84,7 +84,7 @@ export default function AnalysisPage() {
       });
       setDCF(data.dcf);
     } catch (e: any) {
-      setError(e?.response?.data?.detail || 'Failed to perform DCF valuation');
+      setError(e?.response?.data?.detail || 'DCF 밸류에이션을 수행하지 못했습니다');
     } finally {
       setLoadingDcf(false);
     }
@@ -92,7 +92,7 @@ export default function AnalysisPage() {
 
   const handleTabChange = (newTab: Tab) => {
     setTab(newTab);
-    if (newTab === 'swot' && !swot && !loadingSwot) loadSWOT();
+    if (newTab === 'investment' && !investmentAnalysis && !loadingInvestment) loadInvestment();
     if (newTab === 'dcf' && !dcf && !loadingDcf) loadDCF();
   };
 
@@ -116,7 +116,7 @@ export default function AnalysisPage() {
     <div>
       <div style={{ marginBottom: 24 }}>
         <Link to="/" style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-          &larr; Back to Search
+          &larr; 검색으로 돌아가기
         </Link>
       </div>
 
@@ -141,7 +141,7 @@ export default function AnalysisPage() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label style={{ fontSize: 13, color: 'var(--text-muted)' }}>Data years:</label>
+            <label style={{ fontSize: 13, color: 'var(--text-muted)' }}>데이터 기간:</label>
             <select
               value={years}
               onChange={(e) => setYears(Number(e.target.value))}
@@ -152,7 +152,7 @@ export default function AnalysisPage() {
               }}
             >
               {[7, 8, 9, 10, 11, 12, 13, 14, 15].map((y) => (
-                <option key={y} value={y}>{y} years</option>
+                <option key={y} value={y}>{y}년</option>
               ))}
             </select>
           </div>
@@ -172,20 +172,20 @@ export default function AnalysisPage() {
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
         <button style={tabStyle('financials')} onClick={() => handleTabChange('financials')}>
-          Financial Statements
+          재무제표
         </button>
-        <button style={tabStyle('swot')} onClick={() => handleTabChange('swot')}>
-          SWOT Analysis
+        <button style={tabStyle('investment')} onClick={() => handleTabChange('investment')}>
+          투자 분석
         </button>
         <button style={tabStyle('dcf')} onClick={() => handleTabChange('dcf')}>
-          DCF Valuation
+          DCF 밸류에이션
         </button>
       </div>
 
       {/* Financials Tab */}
       {tab === 'financials' && (
         loadingFin ? (
-          <LoadingSpinner text="Loading financial data..." />
+          <LoadingSpinner text="재무 데이터 로딩 중..." />
         ) : statements.length > 0 ? (
           <div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
@@ -204,12 +204,12 @@ export default function AnalysisPage() {
         ) : null
       )}
 
-      {/* SWOT Tab */}
-      {tab === 'swot' && (
-        loadingSwot ? (
-          <LoadingSpinner text="Generating SWOT analysis..." />
-        ) : swot ? (
-          <SWOTView swot={swot} />
+      {/* Investment Analysis Tab */}
+      {tab === 'investment' && (
+        loadingInvestment ? (
+          <LoadingSpinner text="투자 분석 생성 중..." />
+        ) : investmentAnalysis ? (
+          <InvestmentAnalysisView analysis={investmentAnalysis} />
         ) : null
       )}
 
@@ -222,30 +222,30 @@ export default function AnalysisPage() {
             display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end',
           }}>
             <InputGroup
-              label="Projection Years"
+              label="추정 기간"
               value={projYears.toString()}
               onChange={(v) => setProjYears(Math.min(10, Math.max(3, parseInt(v) || 5)))}
-              suffix="yrs"
+              suffix="년"
             />
             <InputGroup
-              label="Custom WACC (optional)"
+              label="WACC (선택)"
               value={customWacc}
               onChange={setCustomWacc}
-              placeholder="Auto"
+              placeholder="자동"
               suffix="%"
             />
             <InputGroup
-              label="Revenue Growth (optional)"
+              label="매출 성장률 (선택)"
               value={customGrowth}
               onChange={setCustomGrowth}
-              placeholder="Auto"
+              placeholder="자동"
               suffix="%"
             />
             <InputGroup
-              label="Terminal Growth (optional)"
+              label="영구 성장률 (선택)"
               value={customTg}
               onChange={setCustomTg}
-              placeholder="Auto"
+              placeholder="자동"
               suffix="%"
             />
             <button
@@ -258,12 +258,12 @@ export default function AnalysisPage() {
                 opacity: loadingDcf ? 0.6 : 1,
               }}
             >
-              {loadingDcf ? 'Calculating...' : dcf ? 'Recalculate' : 'Run DCF'}
+              {loadingDcf ? '계산 중...' : dcf ? '재계산' : 'DCF 실행'}
             </button>
           </div>
 
           {loadingDcf ? (
-            <LoadingSpinner text="Performing DCF valuation..." />
+            <LoadingSpinner text="DCF 밸류에이션 수행 중..." />
           ) : dcf ? (
             <DCFView dcf={dcf} />
           ) : null}

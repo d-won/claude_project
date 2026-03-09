@@ -64,6 +64,36 @@ export interface SWOTAnalysis {
   summary: string;
 }
 
+export interface InvestmentAnalysisItem {
+  title: string;
+  content: string;
+  details: string[];
+}
+
+export interface PriceScenario {
+  name: string;
+  target_price: number;
+  reasoning: string;
+}
+
+export interface TargetPriceAnalysis {
+  current_price: number;
+  target_price: number;
+  upside_pct: number;
+  methodology: string;
+  assumptions: string[];
+  scenarios: PriceScenario[];
+}
+
+export interface InvestmentAnalysis {
+  investment_thesis: InvestmentAnalysisItem[];
+  key_catalysts: InvestmentAnalysisItem[];
+  target_price: TargetPriceAnalysis;
+  key_risks: InvestmentAnalysisItem[];
+  summary: string;
+  recommendation: string;
+}
+
 export interface DCFAssumption {
   parameter: string;
   value: number;

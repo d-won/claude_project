@@ -39,22 +39,22 @@ export default function DCFView({ dcf }: { dcf: DCFResult }) {
           : 'rgba(248, 113, 113, 0.3)',
       }}>
         <ValueBox
-          label="Intrinsic Value"
+          label="내재가치"
           value={`${dcf.currency} ${dcf.intrinsic_value_per_share.toFixed(2)}`}
           color="var(--accent-blue)"
         />
         <ValueBox
-          label="Current Price"
+          label="현재 주가"
           value={`${dcf.currency} ${dcf.current_price.toFixed(2)}`}
           color="var(--text-primary)"
         />
         <ValueBox
-          label="Upside/Downside"
+          label="괴리율"
           value={`${upside > 0 ? '+' : ''}${upside.toFixed(1)}%`}
           color={isUndervalued ? 'var(--accent-green)' : 'var(--accent-red)'}
         />
         <ValueBox
-          label="Enterprise Value"
+          label="기업가치"
           value={`${dcf.currency} ${fmt(dcf.enterprise_value)}`}
           color="var(--accent-purple)"
         />
@@ -63,7 +63,7 @@ export default function DCFView({ dcf }: { dcf: DCFResult }) {
       {/* FCF Projections Chart */}
       <div style={cardStyle}>
         <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
-          Free Cash Flow Projections
+          잉여현금흐름(FCF) 추정
         </div>
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={dcf.projections}>
@@ -75,7 +75,7 @@ export default function DCFView({ dcf }: { dcf: DCFResult }) {
               formatter={(v: number, name: string) => [fmt(v), name]}
             />
             <Legend />
-            <Bar dataKey="revenue" name="Revenue" fill="var(--accent-blue)" opacity={0.4} />
+            <Bar dataKey="revenue" name="매출액" fill="var(--accent-blue)" opacity={0.4} />
             <Bar dataKey="free_cash_flow" name="FCF" fill="var(--accent-green)" />
           </BarChart>
         </ResponsiveContainer>
@@ -84,7 +84,7 @@ export default function DCFView({ dcf }: { dcf: DCFResult }) {
       {/* Assumptions with Reasoning */}
       <div style={cardStyle}>
         <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
-          Key Assumptions & Reasoning
+          핵심 가정 및 근거
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {dcf.assumptions.map((a, i) => (
@@ -107,7 +107,7 @@ export default function DCFView({ dcf }: { dcf: DCFResult }) {
                 {a.reasoning}
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                <strong>Evidence:</strong>
+                <strong>근거:</strong>
                 <ul style={{ margin: '4px 0 0 16px', padding: 0 }}>
                   {a.evidence.map((e, j) => (
                     <li key={j} style={{ marginBottom: 2 }}>{e}</li>
@@ -122,12 +122,12 @@ export default function DCFView({ dcf }: { dcf: DCFResult }) {
       {/* Projection Table */}
       <div style={{ ...cardStyle, overflow: 'auto' }}>
         <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
-          Projection Details ({dcf.currency})
+          추정 상세 ({dcf.currency})
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              {['Year', 'Revenue', 'EBITDA', 'FCF', 'Discount Factor', 'Present Value'].map((h) => (
+              {['연도', '매출액', 'EBITDA', 'FCF', '할인계수', '현재가치'].map((h) => (
                 <th key={h} style={{
                   padding: '10px 12px', textAlign: 'right', fontSize: 12,
                   fontWeight: 600, color: 'var(--text-secondary)',
@@ -150,7 +150,7 @@ export default function DCFView({ dcf }: { dcf: DCFResult }) {
               </tr>
             ))}
             <tr style={{ background: 'rgba(74, 158, 255, 0.05)' }}>
-              <td colSpan={4} style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 600 }}>Terminal Value (PV)</td>
+              <td colSpan={4} style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 600 }}>영구가치 (현재가치)</td>
               <td></td>
               <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 700, color: 'var(--accent-blue)' }}>
                 {fmt(dcf.terminal_value_pv)}
@@ -163,16 +163,16 @@ export default function DCFView({ dcf }: { dcf: DCFResult }) {
       {/* Sensitivity Matrix */}
       <div style={{ ...cardStyle, overflow: 'auto' }}>
         <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>
-          Sensitivity Analysis (Intrinsic Value per Share)
+          민감도 분석 (주당 내재가치)
         </div>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>
-          WACC (rows) vs Terminal Growth Rate (columns)
+          WACC (행) vs 영구 성장률 (열)
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
               <th style={{ padding: 8, fontSize: 12, color: 'var(--text-muted)', borderBottom: '2px solid var(--border)' }}>
-                WACC \ TGR
+                WACC \ 영구성장률
               </th>
               {dcf.sensitivity_matrix.terminal_growth_values.map((tg) => (
                 <th key={tg} style={{ padding: 8, fontSize: 12, textAlign: 'center', color: 'var(--text-secondary)', borderBottom: '2px solid var(--border)' }}>
@@ -213,7 +213,7 @@ export default function DCFView({ dcf }: { dcf: DCFResult }) {
       {/* Methodology */}
       <div style={cardStyle}>
         <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
-          Methodology Notes
+          방법론 참고사항
         </div>
         <ul style={{ margin: 0, padding: '0 0 0 20px' }}>
           {dcf.methodology_notes.map((note, i) => (

@@ -4,11 +4,11 @@ import { searchCompanies } from '../services/api';
 import type { CompanyInfo } from '../types';
 
 const MARKETS = [
-  { value: '', label: 'All Markets' },
-  { value: 'US', label: 'US' },
-  { value: 'KR', label: 'Korea' },
-  { value: 'JP', label: 'Japan' },
-  { value: 'EU', label: 'Europe' },
+  { value: '', label: '전체 시장' },
+  { value: 'US', label: '미국' },
+  { value: 'KR', label: '한국' },
+  { value: 'JP', label: '일본' },
+  { value: 'EU', label: '유럽' },
 ];
 
 const EXAMPLES = [
@@ -51,11 +51,11 @@ export default function HomePage() {
     <div style={{ maxWidth: 900, margin: '0 auto' }}>
       <div style={{ textAlign: 'center', padding: '60px 0 40px' }}>
         <h1 style={{ fontSize: 36, fontWeight: 700, marginBottom: 12 }}>
-          Global Financial Analysis
+          글로벌 재무분석
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: 16, maxWidth: 600, margin: '0 auto' }}>
-          Analyze companies listed in Korea, Japan, Europe, and the US.
-          Get 7-15 years of financial data, SWOT analysis, and DCF valuation.
+          한국, 일본, 유럽, 미국 상장 기업을 분석하세요.
+          7~15년 재무 데이터, 투자 분석, DCF 밸류에이션을 제공합니다.
         </p>
       </div>
 
@@ -67,7 +67,7 @@ export default function HomePage() {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Enter ticker symbol or company name (e.g., AAPL, 005930.KS, 7203.T)"
+          placeholder="티커 또는 기업명 입력 (예: AAPL, 005930.KS, 7203.T)"
           style={{
             flex: 1, padding: '12px 16px', background: 'var(--bg-secondary)',
             border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
@@ -96,14 +96,14 @@ export default function HomePage() {
             fontSize: 15, fontWeight: 600, opacity: loading ? 0.6 : 1,
           }}
         >
-          {loading ? 'Searching...' : 'Search'}
+          {loading ? '검색 중...' : '검색'}
         </button>
       </form>
 
       {!searched && (
         <div>
           <h3 style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 16, textTransform: 'uppercase', letterSpacing: 1 }}>
-            Quick Access
+            빠른 접근
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 12 }}>
             {EXAMPLES.map((ex) => (
@@ -141,7 +141,7 @@ export default function HomePage() {
       {searched && results.length > 0 && (
         <div>
           <h3 style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 16 }}>
-            {results.length} result{results.length !== 1 ? 's' : ''} found
+            {results.length}건의 검색 결과
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {results.map((r) => (
@@ -184,7 +184,7 @@ export default function HomePage() {
 
       {searched && !loading && results.length === 0 && (
         <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
-          No results found. Try a different ticker or company name.
+          검색 결과가 없습니다. 다른 티커 또는 기업명을 입력해보세요.
         </div>
       )}
     </div>

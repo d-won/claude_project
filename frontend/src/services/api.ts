@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type {
   CompanyInfo, FinancialStatement, FinancialMetrics,
-  SWOTAnalysis, DCFResult,
+  SWOTAnalysis, DCFResult, InvestmentAnalysis,
 } from '../types';
 
 const api = axios.create({ baseURL: '/api' });
@@ -33,6 +33,16 @@ export async function getSWOT(ticker: string, years = 10): Promise<{
   period: string;
 }> {
   const { data } = await api.post('/analysis/swot', { ticker, years });
+  return data;
+}
+
+export async function getInvestmentAnalysis(ticker: string, years = 10): Promise<{
+  company: CompanyInfo;
+  analysis: InvestmentAnalysis;
+  data_years: number;
+  period: string;
+}> {
+  const { data } = await api.post('/analysis/investment', { ticker, years });
   return data;
 }
 

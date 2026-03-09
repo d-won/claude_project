@@ -434,6 +434,20 @@ def _build_projections(
     capex_ratio = margin_assumptions[1].value / 100
     tax_rate = margin_assumptions[2].value / 100
 
+    # Calculate historical depreciation/revenue ratio instead of arbitrary 0.3 * EBITDA
+    dep_ratios = []
+    for s in stmts:
+        if s.depreciation and s.revenue and s.revenue > 0:
+            dep_ratios.append(abs(s.depreciation) / s.revenue)
+    dep_ratio = sum(dep_ratios[-3:]) / len(dep_ratios[-3:]) if dep_ratios else ebitda_margin * 0.3
+
+    # Historical FCF margin as sanity check / fallback
+    fcf_margins = []
+    for s in stmts:
+        if s.free_cash_flow is not None and s.revenue and s.revenue > 0:
+            fcf_margins.append(s.free_cash_flow / s.revenue)
+    hist_fcf_margin = sum(fcf_margins[-3:]) / len(fcf_margins[-3:]) if fcf_margins else None
+
     projections = []
     base_year = latest.year
 
@@ -446,7 +460,7 @@ def _build_projections(
         revenue = base_revenue * (1 + year_growth) ** i
 
         ebitda = revenue * ebitda_margin
-        depreciation = ebitda * 0.3  # rough approximation
+        depreciation = revenue * dep_ratio
         ebit = ebitda - depreciation
         taxes = max(ebit * tax_rate, 0)
         nopat = ebit - taxes
@@ -454,6 +468,11 @@ def _build_projections(
 
         # FCF = NOPAT + D&A - CAPEX (simplified, no WC changes)
         fcf = nopat + depreciation - capex
+
+        # If component-based FCF is negative but historical FCF was positive,
+        # use historical FCF margin as fallback (common for capital-intensive firms)
+        if fcf < 0 and hist_fcf_margin is not None and hist_fcf_margin > 0:
+            fcf = revenue * hist_fcf_margin
 
         discount_factor = 1 / (1 + wacc) ** i
         pv = fcf * discount_factor
