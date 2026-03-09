@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: financial-analysis
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 8000
