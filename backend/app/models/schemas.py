@@ -46,26 +46,56 @@ class SWOTRequest(BaseModel):
 
 class FinancialStatement(BaseModel):
     year: int
+    # 손익계산서
     revenue: Optional[float] = None
     cost_of_revenue: Optional[float] = None
     gross_profit: Optional[float] = None
+    selling_general_admin: Optional[float] = None
+    research_development: Optional[float] = None
     operating_income: Optional[float] = None
+    other_income_expense: Optional[float] = None
+    pretax_income: Optional[float] = None
     net_income: Optional[float] = None
-    total_assets: Optional[float] = None
-    total_liabilities: Optional[float] = None
-    total_equity: Optional[float] = None
-    total_debt: Optional[float] = None
-    cash_and_equivalents: Optional[float] = None
-    operating_cash_flow: Optional[float] = None
-    capital_expenditure: Optional[float] = None
-    free_cash_flow: Optional[float] = None
     ebitda: Optional[float] = None
     depreciation: Optional[float] = None
     interest_expense: Optional[float] = None
     tax_expense: Optional[float] = None
-    dividends_paid: Optional[float] = None
-    shares_outstanding: Optional[float] = None
     eps: Optional[float] = None
+    # 재무상태표
+    total_assets: Optional[float] = None
+    current_assets: Optional[float] = None
+    cash_and_equivalents: Optional[float] = None
+    short_term_investments: Optional[float] = None
+    accounts_receivable: Optional[float] = None
+    inventory: Optional[float] = None
+    non_current_assets: Optional[float] = None
+    ppe_net: Optional[float] = None
+    goodwill_intangibles: Optional[float] = None
+    long_term_investments: Optional[float] = None
+    total_liabilities: Optional[float] = None
+    current_liabilities: Optional[float] = None
+    accounts_payable: Optional[float] = None
+    short_term_debt: Optional[float] = None
+    non_current_liabilities: Optional[float] = None
+    long_term_debt: Optional[float] = None
+    total_debt: Optional[float] = None
+    total_equity: Optional[float] = None
+    retained_earnings: Optional[float] = None
+    shares_outstanding: Optional[float] = None
+    # 현금흐름표
+    operating_cash_flow: Optional[float] = None
+    depreciation_cf: Optional[float] = None
+    change_in_working_capital: Optional[float] = None
+    capital_expenditure: Optional[float] = None
+    investing_cash_flow: Optional[float] = None
+    purchase_of_investments: Optional[float] = None
+    sale_of_investments: Optional[float] = None
+    financing_cash_flow: Optional[float] = None
+    debt_issuance: Optional[float] = None
+    debt_repayment: Optional[float] = None
+    share_buyback_issuance: Optional[float] = None
+    dividends_paid: Optional[float] = None
+    free_cash_flow: Optional[float] = None
     currency: str = "USD"
 
 

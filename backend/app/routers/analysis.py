@@ -41,14 +41,26 @@ def _get_market_data(ticker: str):
     current_price = 0
     beta = 1.0
     market_cap = 0
+    shares_outstanding = 0
 
     try:
         import yfinance as yf
         ticker_obj = yf.Ticker(ticker)
         yf_info = ticker_obj.info
-        current_price = yf_info.get("currentPrice") or yf_info.get("regularMarketPrice", 0)
+        # Try multiple price sources for reliability
+        current_price = (
+            yf_info.get("currentPrice")
+            or yf_info.get("regularMarketPrice")
+            or yf_info.get("previousClose")
+            or yf_info.get("regularMarketPreviousClose")
+            or 0
+        )
         beta = yf_info.get("beta", 1.0) or 1.0
         market_cap = yf_info.get("marketCap", 0) or 0
+        shares_outstanding = yf_info.get("sharesOutstanding", 0) or 0
+        # Cross-check: derive shares from market_cap / price if available
+        if shares_outstanding == 0 and market_cap > 0 and current_price > 0:
+            shares_outstanding = market_cap / current_price
     except Exception as e:
         logger.warning(f"Yahoo Finance market data failed: {e}")
         demo_mkt = DEMO_MARKET_INFO.get(ticker, {})
@@ -56,7 +68,7 @@ def _get_market_data(ticker: str):
         beta = demo_mkt.get("beta", 1.0)
         market_cap = demo_mkt.get("market_cap", 1e9)
 
-    return current_price, beta, market_cap
+    return current_price, beta, market_cap, shares_outstanding
 
 
 @router.post("/swot")
@@ -91,7 +103,7 @@ async def investment_analysis(req: SWOTRequest):
         raise HTTPException(status_code=404, detail="No financial data found")
 
     metrics = compute_metrics(statements)
-    current_price, beta, market_cap = _get_market_data(req.ticker)
+    current_price, beta, market_cap, _ = _get_market_data(req.ticker)
     currency = info.currency if info else (statements[-1].currency if statements else "USD")
 
     analysis = generate_investment_analysis(
@@ -122,7 +134,7 @@ async def dcf_valuation(req: DCFRequest):
         raise HTTPException(status_code=404, detail="No financial data found")
 
     metrics = compute_metrics(statements)
-    current_price, beta, market_cap = _get_market_data(req.ticker)
+    current_price, beta, market_cap, shares_outstanding = _get_market_data(req.ticker)
 
     dcf = perform_dcf(
         company_name=info.name if info else req.ticker,
@@ -133,6 +145,7 @@ async def dcf_valuation(req: DCFRequest):
         current_price=current_price,
         beta=beta,
         market_cap=market_cap,
+        shares_outstanding_override=shares_outstanding,
         projection_years=req.projection_years,
         custom_wacc=req.custom_wacc,
         custom_growth_rate=req.custom_growth_rate,

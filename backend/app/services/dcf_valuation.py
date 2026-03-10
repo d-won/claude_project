@@ -18,6 +18,7 @@ def perform_dcf(
     current_price: float,
     beta: float,
     market_cap: float,
+    shares_outstanding_override: float = 0,
     projection_years: int = 5,
     custom_wacc: Optional[float] = None,
     custom_growth_rate: Optional[float] = None,
@@ -64,7 +65,15 @@ def perform_dcf(
     net_debt = (latest.total_debt or 0) - (latest.cash_and_equivalents or 0)
     equity_value = enterprise_value - net_debt
 
-    shares = latest.shares_outstanding or 1
+    # Use shares_outstanding from yfinance info (most reliable), then balance sheet, then derive from market_cap
+    shares = shares_outstanding_override
+    if shares <= 0:
+        shares = latest.shares_outstanding or 0
+    if shares <= 0 and market_cap > 0 and current_price > 0:
+        shares = market_cap / current_price
+    if shares <= 0:
+        shares = 1
+
     intrinsic_per_share = equity_value / shares
 
     upside = ((intrinsic_per_share / current_price) - 1) * 100 if current_price > 0 else 0

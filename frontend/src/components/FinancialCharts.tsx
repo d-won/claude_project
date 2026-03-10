@@ -188,36 +188,69 @@ export function BalanceSheetChart({ data }: { data: FinancialStatement[] }) {
   );
 }
 
-function downloadCSV(statements: FinancialStatement[], metrics: FinancialMetrics[], currency: string) {
-  const allRows = [
+function buildAllRows(currency: string) {
+  return [
     // 손익계산서
     { label: '[ 손익계산서 ]', key: 'header' },
     { label: `매출액 (${currency})`, key: 'revenue', format: 'num' },
-    { label: '매출원가', key: 'cost_of_revenue', format: 'num' },
+    { label: '  매출원가', key: 'cost_of_revenue', format: 'num' },
     { label: '매출총이익', key: 'gross_profit', format: 'num' },
+    { label: '  판매비와관리비', key: 'selling_general_admin', format: 'num' },
+    { label: '  연구개발비', key: 'research_development', format: 'num' },
+    { label: '  감가상각비', key: 'depreciation', format: 'num' },
     { label: '영업이익', key: 'operating_income', format: 'num' },
-    { label: 'EBITDA', key: 'ebitda', format: 'num' },
-    { label: '감가상각비', key: 'depreciation', format: 'num' },
-    { label: '이자비용', key: 'interest_expense', format: 'num' },
-    { label: '법인세비용', key: 'tax_expense', format: 'num' },
+    { label: '  영업외손익', key: 'other_income_expense', format: 'num' },
+    { label: '  이자비용', key: 'interest_expense', format: 'num' },
+    { label: '세전이익', key: 'pretax_income', format: 'num' },
+    { label: '  법인세비용', key: 'tax_expense', format: 'num' },
     { label: '순이익', key: 'net_income', format: 'num' },
+    { label: 'EBITDA', key: 'ebitda', format: 'num' },
     { label: 'EPS', key: 'eps', format: 'num' },
-    // 재무상태표
-    { label: '[ 재무상태표 ]', key: 'header2' },
+    // 재무상태표 - 자산
+    { label: '[ 재무상태표 - 자산 ]', key: 'header_asset' },
     { label: '총자산', key: 'total_assets', format: 'num' },
+    { label: '  유동자산', key: 'current_assets', format: 'num' },
+    { label: '    현금및현금성자산', key: 'cash_and_equivalents', format: 'num' },
+    { label: '    단기투자자산', key: 'short_term_investments', format: 'num' },
+    { label: '    매출채권', key: 'accounts_receivable', format: 'num' },
+    { label: '    재고자산', key: 'inventory', format: 'num' },
+    { label: '  비유동자산', key: 'non_current_assets', format: 'num' },
+    { label: '    유형자산(순액)', key: 'ppe_net', format: 'num' },
+    { label: '    영업권/무형자산', key: 'goodwill_intangibles', format: 'num' },
+    { label: '    장기투자자산', key: 'long_term_investments', format: 'num' },
+    // 재무상태표 - 부채
+    { label: '[ 재무상태표 - 부채 ]', key: 'header_liab' },
     { label: '총부채', key: 'total_liabilities', format: 'num' },
-    { label: '자본총계', key: 'total_equity', format: 'num' },
+    { label: '  유동부채', key: 'current_liabilities', format: 'num' },
+    { label: '    매입채무', key: 'accounts_payable', format: 'num' },
+    { label: '    단기차입금', key: 'short_term_debt', format: 'num' },
+    { label: '  비유동부채', key: 'non_current_liabilities', format: 'num' },
+    { label: '    장기차입금', key: 'long_term_debt', format: 'num' },
     { label: '총차입금', key: 'total_debt', format: 'num' },
-    { label: '현금및현금성자산', key: 'cash_and_equivalents', format: 'num' },
+    // 재무상태표 - 자본
+    { label: '[ 재무상태표 - 자본 ]', key: 'header_equity' },
+    { label: '자본총계', key: 'total_equity', format: 'num' },
+    { label: '  이익잉여금', key: 'retained_earnings', format: 'num' },
     { label: '발행주식수', key: 'shares_outstanding', format: 'num' },
     // 현금흐름표
-    { label: '[ 현금흐름표 ]', key: 'header3' },
+    { label: '[ 현금흐름표 - 영업활동 ]', key: 'header_opcf' },
     { label: '영업현금흐름', key: 'operating_cash_flow', format: 'num' },
-    { label: '설비투자(CAPEX)', key: 'capital_expenditure', format: 'num' },
+    { label: '  감가상각비(CF)', key: 'depreciation_cf', format: 'num' },
+    { label: '  운전자본변동', key: 'change_in_working_capital', format: 'num' },
+    { label: '[ 현금흐름표 - 투자활동 ]', key: 'header_invcf' },
+    { label: '투자현금흐름', key: 'investing_cash_flow', format: 'num' },
+    { label: '  설비투자(CAPEX)', key: 'capital_expenditure', format: 'num' },
+    { label: '  투자자산매입', key: 'purchase_of_investments', format: 'num' },
+    { label: '  투자자산매각', key: 'sale_of_investments', format: 'num' },
+    { label: '[ 현금흐름표 - 재무활동 ]', key: 'header_fincf' },
+    { label: '재무현금흐름', key: 'financing_cash_flow', format: 'num' },
+    { label: '  차입금조달', key: 'debt_issuance', format: 'num' },
+    { label: '  차입금상환', key: 'debt_repayment', format: 'num' },
+    { label: '  자사주매입/발행', key: 'share_buyback_issuance', format: 'num' },
+    { label: '  배당금지급', key: 'dividends_paid', format: 'num' },
     { label: '잉여현금흐름(FCF)', key: 'free_cash_flow', format: 'num' },
-    { label: '배당금지급', key: 'dividends_paid', format: 'num' },
     // 주요 지표
-    { label: '[ 주요 재무지표 ]', key: 'header4' },
+    { label: '[ 주요 재무지표 ]', key: 'header_metrics' },
     { label: '매출총이익률', key: 'gross_margin', format: 'pct', metric: true },
     { label: '영업이익률', key: 'operating_margin', format: 'pct', metric: true },
     { label: '순이익률', key: 'net_margin', format: 'pct', metric: true },
@@ -225,11 +258,17 @@ function downloadCSV(statements: FinancialStatement[], metrics: FinancialMetrics
     { label: 'ROA', key: 'roa', format: 'pct', metric: true },
     { label: 'ROIC', key: 'roic', format: 'pct', metric: true },
     { label: 'D/E 비율', key: 'debt_to_equity', format: 'ratio', metric: true },
+    { label: '유동비율', key: 'current_ratio', format: 'ratio', metric: true },
     { label: '이자보상배율', key: 'interest_coverage', format: 'ratio', metric: true },
+    { label: '총자산회전율', key: 'asset_turnover', format: 'ratio', metric: true },
     { label: '매출 성장률', key: 'revenue_growth', format: 'pct', metric: true },
     { label: '순이익 성장률', key: 'earnings_growth', format: 'pct', metric: true },
     { label: 'FCF 마진', key: 'fcf_margin', format: 'pct', metric: true },
   ];
+}
+
+function downloadCSV(statements: FinancialStatement[], metrics: FinancialMetrics[], currency: string) {
+  const allRows = buildAllRows(currency);
 
   const header = ['항목', ...statements.map(s => s.year.toString())].join(',');
   const rows = allRows.map(row => {
@@ -262,41 +301,84 @@ export function FinancialTable({ statements, metrics, currency }: {
   metrics: FinancialMetrics[];
   currency: string;
 }) {
-  type RowDef = { label: string; key: string; format: (v: any) => string; metric?: boolean; section?: boolean };
+  type RowDef = { label: string; key: string; format: (v: any) => string; metric?: boolean; section?: boolean; indent?: number };
 
   const sectionHeader = (label: string): RowDef => ({
     label, key: `section_${label}`, format: () => '', section: true,
   });
 
+  const fmtEps = (v: number | null) => v !== null ? v.toLocaleString(undefined, { maximumFractionDigits: 0 }) : 'N/A';
+  const fmtRatio = (v: number | null) => v !== null ? `${v.toFixed(2)}x` : 'N/A';
+  const fmtRatio1 = (v: number | null) => v !== null ? `${v.toFixed(1)}x` : 'N/A';
+
   const rows: RowDef[] = [
     // 손익계산서
     sectionHeader('손익계산서'),
     { label: `매출액 (${currency})`, key: 'revenue', format: fmt },
-    { label: '매출원가', key: 'cost_of_revenue', format: fmt },
+    { label: '매출원가', key: 'cost_of_revenue', format: fmt, indent: 1 },
     { label: '매출총이익', key: 'gross_profit', format: fmt },
+    { label: '판매비와관리비', key: 'selling_general_admin', format: fmt, indent: 1 },
+    { label: '연구개발비', key: 'research_development', format: fmt, indent: 1 },
+    { label: '감가상각비', key: 'depreciation', format: fmt, indent: 1 },
     { label: '영업이익', key: 'operating_income', format: fmt },
-    { label: 'EBITDA', key: 'ebitda', format: fmt },
-    { label: '감가상각비', key: 'depreciation', format: fmt },
-    { label: '이자비용', key: 'interest_expense', format: fmt },
-    { label: '법인세비용', key: 'tax_expense', format: fmt },
+    { label: '영업외손익', key: 'other_income_expense', format: fmt, indent: 1 },
+    { label: '이자비용', key: 'interest_expense', format: fmt, indent: 1 },
+    { label: '세전이익', key: 'pretax_income', format: fmt },
+    { label: '법인세비용', key: 'tax_expense', format: fmt, indent: 1 },
     { label: '순이익', key: 'net_income', format: fmt },
-    { label: 'EPS', key: 'eps', format: (v: number | null) => v !== null ? v.toLocaleString(undefined, { maximumFractionDigits: 0 }) : 'N/A' },
+    { label: 'EBITDA', key: 'ebitda', format: fmt },
+    { label: 'EPS', key: 'eps', format: fmtEps },
 
-    // 재무상태표
-    sectionHeader('재무상태표'),
+    // 재무상태표 - 자산
+    sectionHeader('재무상태표 - 자산'),
     { label: '총자산', key: 'total_assets', format: fmt },
+    { label: '유동자산', key: 'current_assets', format: fmt, indent: 1 },
+    { label: '현금및현금성자산', key: 'cash_and_equivalents', format: fmt, indent: 2 },
+    { label: '단기투자자산', key: 'short_term_investments', format: fmt, indent: 2 },
+    { label: '매출채권', key: 'accounts_receivable', format: fmt, indent: 2 },
+    { label: '재고자산', key: 'inventory', format: fmt, indent: 2 },
+    { label: '비유동자산', key: 'non_current_assets', format: fmt, indent: 1 },
+    { label: '유형자산(순액)', key: 'ppe_net', format: fmt, indent: 2 },
+    { label: '영업권/무형자산', key: 'goodwill_intangibles', format: fmt, indent: 2 },
+    { label: '장기투자자산', key: 'long_term_investments', format: fmt, indent: 2 },
+
+    // 재무상태표 - 부채
+    sectionHeader('재무상태표 - 부채'),
     { label: '총부채', key: 'total_liabilities', format: fmt },
-    { label: '자본총계', key: 'total_equity', format: fmt },
+    { label: '유동부채', key: 'current_liabilities', format: fmt, indent: 1 },
+    { label: '매입채무', key: 'accounts_payable', format: fmt, indent: 2 },
+    { label: '단기차입금', key: 'short_term_debt', format: fmt, indent: 2 },
+    { label: '비유동부채', key: 'non_current_liabilities', format: fmt, indent: 1 },
+    { label: '장기차입금', key: 'long_term_debt', format: fmt, indent: 2 },
     { label: '총차입금', key: 'total_debt', format: fmt },
-    { label: '현금및현금성자산', key: 'cash_and_equivalents', format: fmt },
+
+    // 재무상태표 - 자본
+    sectionHeader('재무상태표 - 자본'),
+    { label: '자본총계', key: 'total_equity', format: fmt },
+    { label: '이익잉여금', key: 'retained_earnings', format: fmt, indent: 1 },
     { label: '발행주식수', key: 'shares_outstanding', format: fmt },
 
-    // 현금흐름표
-    sectionHeader('현금흐름표'),
+    // 현금흐름표 - 영업활동
+    sectionHeader('현금흐름표 - 영업활동'),
     { label: '영업현금흐름', key: 'operating_cash_flow', format: fmt },
-    { label: '설비투자(CAPEX)', key: 'capital_expenditure', format: fmt },
+    { label: '감가상각비(CF)', key: 'depreciation_cf', format: fmt, indent: 1 },
+    { label: '운전자본변동', key: 'change_in_working_capital', format: fmt, indent: 1 },
+
+    // 현금흐름표 - 투자활동
+    sectionHeader('현금흐름표 - 투자활동'),
+    { label: '투자현금흐름', key: 'investing_cash_flow', format: fmt },
+    { label: '설비투자(CAPEX)', key: 'capital_expenditure', format: fmt, indent: 1 },
+    { label: '투자자산매입', key: 'purchase_of_investments', format: fmt, indent: 1 },
+    { label: '투자자산매각', key: 'sale_of_investments', format: fmt, indent: 1 },
+
+    // 현금흐름표 - 재무활동
+    sectionHeader('현금흐름표 - 재무활동'),
+    { label: '재무현금흐름', key: 'financing_cash_flow', format: fmt },
+    { label: '차입금조달', key: 'debt_issuance', format: fmt, indent: 1 },
+    { label: '차입금상환', key: 'debt_repayment', format: fmt, indent: 1 },
+    { label: '자사주매입/발행', key: 'share_buyback_issuance', format: fmt, indent: 1 },
+    { label: '배당금지급', key: 'dividends_paid', format: fmt, indent: 1 },
     { label: '잉여현금흐름(FCF)', key: 'free_cash_flow', format: fmt },
-    { label: '배당금지급', key: 'dividends_paid', format: fmt },
 
     // 주요 지표
     sectionHeader('주요 재무지표'),
@@ -306,9 +388,10 @@ export function FinancialTable({ statements, metrics, currency }: {
     { label: 'ROE', key: 'roe', format: pct, metric: true },
     { label: 'ROA', key: 'roa', format: pct, metric: true },
     { label: 'ROIC', key: 'roic', format: pct, metric: true },
-    { label: 'D/E 비율', key: 'debt_to_equity', format: (v: number | null) => v !== null ? `${v.toFixed(2)}x` : 'N/A', metric: true },
-    { label: '이자보상배율', key: 'interest_coverage', format: (v: number | null) => v !== null ? `${v.toFixed(1)}x` : 'N/A', metric: true },
-    { label: '총자산회전율', key: 'asset_turnover', format: (v: number | null) => v !== null ? `${v.toFixed(2)}x` : 'N/A', metric: true },
+    { label: 'D/E 비율', key: 'debt_to_equity', format: fmtRatio, metric: true },
+    { label: '유동비율', key: 'current_ratio', format: fmtRatio, metric: true },
+    { label: '이자보상배율', key: 'interest_coverage', format: fmtRatio1, metric: true },
+    { label: '총자산회전율', key: 'asset_turnover', format: fmtRatio, metric: true },
     { label: '매출 성장률', key: 'revenue_growth', format: pct, metric: true },
     { label: '순이익 성장률', key: 'earnings_growth', format: pct, metric: true },
     { label: 'FCF 마진', key: 'fcf_margin', format: pct, metric: true },
@@ -379,7 +462,11 @@ export function FinancialTable({ statements, metrics, currency }: {
             return (
               <tr key={row.key}>
                 <td style={{
-                  ...tdStyle, textAlign: 'left', fontWeight: 500, color: 'var(--text-secondary)',
+                  ...tdStyle, textAlign: 'left',
+                  fontWeight: row.indent ? 400 : 500,
+                  color: row.indent ? 'var(--text-muted)' : 'var(--text-secondary)',
+                  paddingLeft: 12 + (row.indent || 0) * 16,
+                  fontSize: row.indent && row.indent >= 2 ? 12 : 13,
                   position: 'sticky', left: 0, background: 'var(--bg-card)', zIndex: 1,
                 }}>
                   {row.label}

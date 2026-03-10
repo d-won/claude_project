@@ -59,7 +59,7 @@ export default function HomePage() {
         </p>
       </div>
 
-      <form onSubmit={handleSearch} style={{
+      <form onSubmit={handleSearch} className="search-form" style={{
         display: 'flex', gap: 12, marginBottom: 32,
         background: 'var(--bg-card)', padding: 16, borderRadius: 'var(--radius)',
         border: '1px solid var(--border)',

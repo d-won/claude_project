@@ -121,7 +121,7 @@ export default function AnalysisPage() {
       </div>
 
       {company && (
-        <div style={{
+        <div className="company-header" style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
           marginBottom: 24, flexWrap: 'wrap', gap: 16,
         }}>
@@ -170,7 +170,7 @@ export default function AnalysisPage() {
       )}
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+      <div className="tab-bar" style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
         <button style={tabStyle('financials')} onClick={() => handleTabChange('financials')}>
           재무제표
         </button>
@@ -188,7 +188,7 @@ export default function AnalysisPage() {
           <LoadingSpinner text="재무 데이터 로딩 중..." />
         ) : statements.length > 0 ? (
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="chart-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               <RevenueChart data={statements} />
               <MarginsChart data={metrics} />
               <CashFlowChart data={statements} />
@@ -216,7 +216,7 @@ export default function AnalysisPage() {
       {/* DCF Tab */}
       {tab === 'dcf' && (
         <div>
-          <div style={{
+          <div className="dcf-params" style={{
             background: 'var(--bg-card)', border: '1px solid var(--border)',
             borderRadius: 'var(--radius)', padding: 20, marginBottom: 20,
             display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end',

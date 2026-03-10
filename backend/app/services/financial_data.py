@@ -203,10 +203,16 @@ def _build_statement(
                 return _safe_float(df.loc[key, col])
         return None
 
+    # 손익계산서
     revenue = get_val(income_stmt, ["Total Revenue", "Revenue"])
     cost_of_revenue = get_val(income_stmt, ["Cost Of Revenue", "Cost of Revenue"])
     gross_profit = get_val(income_stmt, ["Gross Profit"])
+    sga = get_val(income_stmt, ["Selling General And Administration", "Selling General And Administrative"])
+    rnd = get_val(income_stmt, ["Research And Development", "Research Development"])
     operating_income = get_val(income_stmt, ["Operating Income", "EBIT"])
+    other_income = get_val(income_stmt, ["Other Non Operating Income Expenses",
+                                          "Other Income Expense", "Special Income Charges"])
+    pretax_income = get_val(income_stmt, ["Pretax Income", "Income Before Tax"])
     net_income = get_val(income_stmt, ["Net Income", "Net Income Common Stockholders"])
     ebitda = get_val(income_stmt, ["EBITDA", "Normalized EBITDA"])
     depreciation = get_val(income_stmt, ["Depreciation And Amortization In Income Statement",
@@ -215,18 +221,57 @@ def _build_statement(
     tax_expense = get_val(income_stmt, ["Tax Provision", "Income Tax Expense"])
     eps = get_val(income_stmt, ["Basic EPS", "Diluted EPS"])
 
+    # 재무상태표 - 자산
     total_assets = get_val(balance_sheet, ["Total Assets"])
+    current_assets = get_val(balance_sheet, ["Current Assets"])
+    cash = get_val(balance_sheet, ["Cash And Cash Equivalents"])
+    short_term_inv = get_val(balance_sheet, ["Other Short Term Investments",
+                                              "Cash Cash Equivalents And Short Term Investments"])
+    if cash is None:
+        cash = short_term_inv
+        short_term_inv = None
+    accounts_receivable = get_val(balance_sheet, ["Accounts Receivable", "Receivables", "Net Receivables"])
+    inventory = get_val(balance_sheet, ["Inventory", "Raw Materials"])
+    non_current_assets = get_val(balance_sheet, ["Total Non Current Assets"])
+    ppe_net = get_val(balance_sheet, ["Net PPE", "Gross PPE", "Properties"])
+    goodwill_intangibles = get_val(balance_sheet, ["Goodwill And Other Intangible Assets",
+                                                    "Goodwill", "Other Intangible Assets"])
+    long_term_inv = get_val(balance_sheet, ["Long Term Investments", "Investments And Advances",
+                                             "Other Non Current Assets"])
+
+    # 재무상태표 - 부채
     total_liabilities = get_val(balance_sheet, ["Total Liabilities Net Minority Interest",
                                                  "Total Liabilities"])
+    current_liabilities = get_val(balance_sheet, ["Current Liabilities"])
+    accounts_payable = get_val(balance_sheet, ["Accounts Payable", "Payables And Accrued Expenses"])
+    short_term_debt_val = get_val(balance_sheet, ["Current Debt", "Current Debt And Capital Lease Obligation",
+                                                   "Current Capital Lease Obligation"])
+    non_current_liabilities = get_val(balance_sheet, ["Total Non Current Liabilities Net Minority Interest",
+                                                       "Total Non Current Liabilities"])
+    long_term_debt_val = get_val(balance_sheet, ["Long Term Debt", "Long Term Debt And Capital Lease Obligation"])
+    total_debt = get_val(balance_sheet, ["Total Debt"])
+    if total_debt is None and long_term_debt_val is not None:
+        total_debt = long_term_debt_val + (short_term_debt_val or 0)
+
+    # 재무상태표 - 자본
     total_equity = get_val(balance_sheet, ["Total Equity Gross Minority Interest",
                                             "Stockholders Equity", "Total Stockholder Equity"])
-    total_debt = get_val(balance_sheet, ["Total Debt", "Long Term Debt"])
-    cash = get_val(balance_sheet, ["Cash And Cash Equivalents",
-                                    "Cash Cash Equivalents And Short Term Investments"])
+    retained_earnings = get_val(balance_sheet, ["Retained Earnings"])
     shares = get_val(balance_sheet, ["Share Issued", "Ordinary Shares Number"])
 
+    # 현금흐름표
     ocf = get_val(cashflow, ["Operating Cash Flow", "Cash Flow From Continuing Operating Activities"])
+    dep_cf = get_val(cashflow, ["Depreciation And Amortization", "Depreciation Amortization Depletion"])
+    wc_change = get_val(cashflow, ["Change In Working Capital", "Changes In Working Capital"])
     capex = get_val(cashflow, ["Capital Expenditure", "Purchase Of PPE"])
+    inv_cf = get_val(cashflow, ["Investing Cash Flow", "Cash Flow From Continuing Investing Activities"])
+    purchase_inv = get_val(cashflow, ["Purchase Of Investment", "Net Investment Purchase And Sale"])
+    sale_inv = get_val(cashflow, ["Sale Of Investment"])
+    fin_cf = get_val(cashflow, ["Financing Cash Flow", "Cash Flow From Continuing Financing Activities"])
+    debt_issue = get_val(cashflow, ["Issuance Of Debt", "Long Term Debt Issuance"])
+    debt_repay = get_val(cashflow, ["Repayment Of Debt", "Long Term Debt Payments"])
+    share_buyback = get_val(cashflow, ["Net Common Stock Issuance", "Common Stock Issuance",
+                                        "Repurchase Of Capital Stock"])
     dividends = get_val(cashflow, ["Cash Dividends Paid", "Common Stock Dividend Paid"])
 
     fcf = None
@@ -238,23 +283,50 @@ def _build_statement(
         revenue=revenue,
         cost_of_revenue=cost_of_revenue,
         gross_profit=gross_profit,
+        selling_general_admin=sga,
+        research_development=rnd,
         operating_income=operating_income,
+        other_income_expense=other_income,
+        pretax_income=pretax_income,
         net_income=net_income,
-        total_assets=total_assets,
-        total_liabilities=total_liabilities,
-        total_equity=total_equity,
-        total_debt=total_debt,
-        cash_and_equivalents=cash,
-        operating_cash_flow=ocf,
-        capital_expenditure=capex,
-        free_cash_flow=fcf,
         ebitda=ebitda,
         depreciation=depreciation,
         interest_expense=interest_expense,
         tax_expense=tax_expense,
-        dividends_paid=dividends,
-        shares_outstanding=shares,
         eps=eps,
+        total_assets=total_assets,
+        current_assets=current_assets,
+        cash_and_equivalents=cash,
+        short_term_investments=short_term_inv,
+        accounts_receivable=accounts_receivable,
+        inventory=inventory,
+        non_current_assets=non_current_assets,
+        ppe_net=ppe_net,
+        goodwill_intangibles=goodwill_intangibles,
+        long_term_investments=long_term_inv,
+        total_liabilities=total_liabilities,
+        current_liabilities=current_liabilities,
+        accounts_payable=accounts_payable,
+        short_term_debt=short_term_debt_val,
+        non_current_liabilities=non_current_liabilities,
+        long_term_debt=long_term_debt_val,
+        total_debt=total_debt,
+        total_equity=total_equity,
+        retained_earnings=retained_earnings,
+        shares_outstanding=shares,
+        operating_cash_flow=ocf,
+        depreciation_cf=dep_cf,
+        change_in_working_capital=wc_change,
+        capital_expenditure=capex,
+        investing_cash_flow=inv_cf,
+        purchase_of_investments=purchase_inv,
+        sale_of_investments=sale_inv,
+        financing_cash_flow=fin_cf,
+        debt_issuance=debt_issue,
+        debt_repayment=debt_repay,
+        share_buyback_issuance=share_buyback,
+        dividends_paid=dividends,
+        free_cash_flow=fcf,
         currency=currency,
     )
 
@@ -295,7 +367,9 @@ def compute_metrics(statements: list[FinancialStatement]) -> list[FinancialMetri
 
         d_to_e = (td / te) if (td and te and te != 0) else None
 
-        current_ratio = None  # Would need current assets/liabilities
+        current_ratio = None
+        if stmt.current_assets and stmt.current_liabilities and stmt.current_liabilities != 0:
+            current_ratio = stmt.current_assets / stmt.current_liabilities
 
         interest_coverage = None
         if ebitda and ie and ie != 0:

@@ -33,7 +33,7 @@ export default function InvestmentAnalysisView({ analysis }: { analysis: Investm
   return (
     <div>
       {/* Summary & Recommendation */}
-      <div style={{
+      <div className="investment-analysis-summary" style={{
         ...cardStyle,
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         background: isUpside ? 'rgba(52, 211, 153, 0.05)' : 'rgba(248, 113, 113, 0.05)',
@@ -143,7 +143,7 @@ function TargetPriceCard({ analysis }: { analysis: InvestmentAnalysis }) {
   return (
     <div>
       {/* Price comparison */}
-      <div style={{
+      <div className="target-price-grid" style={{
         ...cardStyle,
         display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20,
         background: sectionColors.target.bg,
@@ -201,7 +201,7 @@ function TargetPriceCard({ analysis }: { analysis: InvestmentAnalysis }) {
         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12, color: 'var(--text-primary)' }}>
           시나리오별 목표가
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+        <div className="scenario-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
           {tp.scenarios.map((s, i) => {
             const scenarioColor = i === 0 ? 'var(--accent-green)' : i === 2 ? 'var(--accent-red)' : 'var(--accent-blue)';
             return (

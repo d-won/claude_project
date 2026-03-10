@@ -28,7 +28,7 @@ export default function DCFView({ dcf }: { dcf: DCFResult }) {
   return (
     <div>
       {/* Valuation Summary */}
-      <div style={{
+      <div className="dcf-summary-grid" style={{
         ...cardStyle,
         display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20,
         background: isUndervalued

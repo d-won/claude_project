@@ -10,26 +10,58 @@ export interface CompanyInfo {
 
 export interface FinancialStatement {
   year: number;
+  // 손익계산서
   revenue: number | null;
   cost_of_revenue: number | null;
   gross_profit: number | null;
+  selling_general_admin: number | null;
+  research_development: number | null;
   operating_income: number | null;
+  other_income_expense: number | null;
+  pretax_income: number | null;
   net_income: number | null;
-  total_assets: number | null;
-  total_liabilities: number | null;
-  total_equity: number | null;
-  total_debt: number | null;
-  cash_and_equivalents: number | null;
-  operating_cash_flow: number | null;
-  capital_expenditure: number | null;
-  free_cash_flow: number | null;
   ebitda: number | null;
   depreciation: number | null;
   interest_expense: number | null;
   tax_expense: number | null;
-  dividends_paid: number | null;
-  shares_outstanding: number | null;
   eps: number | null;
+  // 재무상태표 - 자산
+  total_assets: number | null;
+  current_assets: number | null;
+  cash_and_equivalents: number | null;
+  short_term_investments: number | null;
+  accounts_receivable: number | null;
+  inventory: number | null;
+  non_current_assets: number | null;
+  ppe_net: number | null;
+  goodwill_intangibles: number | null;
+  long_term_investments: number | null;
+  // 재무상태표 - 부채
+  total_liabilities: number | null;
+  current_liabilities: number | null;
+  accounts_payable: number | null;
+  short_term_debt: number | null;
+  non_current_liabilities: number | null;
+  long_term_debt: number | null;
+  total_debt: number | null;
+  // 재무상태표 - 자본
+  total_equity: number | null;
+  retained_earnings: number | null;
+  shares_outstanding: number | null;
+  // 현금흐름표
+  operating_cash_flow: number | null;
+  depreciation_cf: number | null;
+  change_in_working_capital: number | null;
+  capital_expenditure: number | null;
+  investing_cash_flow: number | null;
+  purchase_of_investments: number | null;
+  sale_of_investments: number | null;
+  financing_cash_flow: number | null;
+  debt_issuance: number | null;
+  debt_repayment: number | null;
+  share_buyback_issuance: number | null;
+  dividends_paid: number | null;
+  free_cash_flow: number | null;
   currency: string;
 }
 
