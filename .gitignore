@@ -13,3 +13,4 @@ build/
 tools/dc_sentiment/data/
 tools/dc_sentiment/report/
 .pytest_cache/
+tools/dc_sentiment/results/posts_scored.csv

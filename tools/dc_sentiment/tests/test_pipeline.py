@@ -14,7 +14,7 @@ LIST_HTML = """
  <td class="gall_tit"><a>그세 스노우플레이크 영입</a></td><td class="gall_date" title="2025-02-03 12:00:00">02.03</td>
  <td class="gall_count">1,234</td><td class="gall_recommend">15</td></tr>
 </tbody></table>
-<div class="bottom_paging_box"><em>1</em><a href="#">2</a><a class="search_next" href="/mgallery/board/lists/?id=automata&search_pos=-120000&s_keyword=x">다음검색</a></div>
+<div class="bottom_paging_box iconpaging"></div><div class="bottom_paging_box"><em>1</em><a href="/mgallery/board/lists/?id=automata&page=2">2</a><a class="search_next" href="/mgallery/board/lists/?id=automata&search_pos=-120000&s_keyword=x">다음검색</a></div>
 """
 
 def test_parse_list():

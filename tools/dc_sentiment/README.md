@@ -8,12 +8,19 @@
 ```bash
 pip install -r requirements.txt
 
-# 1) 수집: 제목+내용 검색으로 2024-10-01 이후 글과 본문 수집 (요청 간 1~2초 대기)
-python run.py crawl --gallery automata --since 2024-10-01 --out data/posts.jsonl
-
-# 2) 분석: 2024Q4 ~ 2026Q3 (8개 분기)
-python run.py report --in data/posts.jsonl --since 2024-10-01 --until 2026-09-30 --out report
+# 1) 목록 수집 (제목·날짜·조회수) — 빠름
+python run.py crawl --gallery automata --since 2024-09-26 --no-body --out data/titles.jsonl
+# 2) 본문 수집 (재실행하면 이어받음) + 차단으로 비어버린 본문 재수집
+python run.py bodies --in data/titles.jsonl --out data/posts.jsonl --workers 4
+python run.py bodies --refill --out data/posts.jsonl --workers 2 --delay 1.0
+# 3) 분기별 층화 표본 추출 → 읽고 labels.tsv 작성 (형식은 sample.py 참고)
+python sample.py --per-quarter 60 --out data/sample.txt
+# 4) 리포트 (언급량 전수 + 사전 기반 감성 + 표본 라벨 감성)
+python run.py report --in data/posts.jsonl --since 2024-10-01 --until 2026-09-30 \
+    --labels results/labels_all.tsv --out results
 ```
+
+2026-09-26 실행 결과 요약은 [`results/SUMMARY.md`](results/SUMMARY.md)에 있습니다.
 
 갤러리 종류(일반/마이너/미니)는 자동 감지합니다. 강제하려면 `--gallery-type mgallery` 등을 지정하세요.
 

@@ -106,15 +106,22 @@ class DCClient:
                 if not has_next_page or not rows:
                     break
                 page += 1
+            print(f"  [{keyword}] search_pos={search_pos} {page}페이지, 가장 오래된 글 {oldest_in_block}", flush=True)
             if oldest_in_block and datetime.strptime(oldest_in_block, "%Y-%m-%d %H:%M:%S") < since:
                 return
             if next_pos is None:
                 return
             search_pos = next_pos
 
-    def fetch_body(self, no: int) -> str:
-        html = self._get(BASE + self._prefix() + "/view/", id=self.gallery_id, no=no)
-        return parse_body(html)
+    def fetch_body(self, no: int, retries: int = 3) -> str:
+        # 과도한 요청 시 본문이 빈 페이지가 돌아온다. 이미지·투표도 없는 빈 본문이면 쉬었다가 재시도
+        for attempt in range(retries + 1):
+            html = self._get(BASE + self._prefix() + "/view/", id=self.gallery_id, no=no)
+            body = parse_body(html)
+            if body or has_media(html):
+                return body
+            time.sleep(5 * (attempt + 1))
+        return ""
 
 
 def _int(text: str) -> int:
@@ -161,14 +168,25 @@ def parse_list(html: str) -> tuple[list[Post], int | None, bool]:
         if "search_pos" in qs:
             next_pos = int(qs["search_pos"][0])
 
+    # 페이징 박스가 여러 개일 수 있어 링크의 page 파라미터로 판단한다 (search_next 제외)
     has_next_page = False
-    paging = soup.select_one("div.bottom_paging_box")
-    if paging:
-        current = paging.select_one("em")
-        cur = _int(current.get_text()) if current else 1
-        pages = [_int(a.get_text()) for a in paging.select("a") if a.get_text(strip=True).isdigit()]
-        has_next_page = any(p > cur for p in pages)
+    for box in soup.select("div.bottom_paging_box"):
+        em = box.select_one("em")
+        if not em:
+            continue
+        cur = _int(em.get_text())
+        for a in box.select("a[href]"):
+            if "search_next" in (a.get("class") or []):
+                continue
+            qs = parse_qs(urlparse(urljoin(BASE, a["href"])).query)
+            if "page" in qs and _int(qs["page"][0]) > cur:
+                has_next_page = True
     return posts, next_pos, has_next_page
+
+
+def has_media(html: str) -> bool:
+    div = BeautifulSoup(html, "html.parser").select_one("div.write_div")
+    return bool(div and div.select("img, iframe, video, embed"))
 
 
 def parse_body(html: str) -> str:
@@ -198,3 +216,75 @@ def crawl(gallery_id, keywords, since, out_path, gallery_type=None, fetch_bodies
                     print(f"본문 {i}/{len(posts)}")
             f.write(json.dumps(asdict(p), ensure_ascii=False) + "\n")
     return len(posts)
+
+
+def fetch_bodies(gallery_id, in_path, out_path, gallery_type=None, workers=3, delay=0.5):
+    """in_path(JSONL) 의 글마다 본문을 채워 out_path 에 추가 기록. 중단 후 재실행하면 이어서 받는다."""
+    import os
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+
+    done: set[int] = set()
+    if os.path.exists(out_path):
+        with open(out_path, encoding="utf-8") as f:
+            done = {json.loads(line)["no"] for line in f if line.strip()}
+    with open(in_path, encoding="utf-8") as f:
+        todo = [json.loads(line) for line in f if line.strip()]
+    todo = [p for p in todo if p["no"] not in done]
+    print(f"본문 수집 대상 {len(todo)}건 (완료 {len(done)}건)", flush=True)
+
+    local = threading.local()
+    lock = threading.Lock()
+    count = [0]
+
+    def work(p):
+        if not hasattr(local, "client"):
+            local.client = DCClient(gallery_id, gallery_type or "mgallery", delay)
+        try:
+            p["body"] = local.client.fetch_body(p["no"])
+        except RuntimeError as e:
+            p["body"] = ""
+            p["error"] = str(e)
+        with lock:
+            out.write(json.dumps(p, ensure_ascii=False) + "\n")
+            count[0] += 1
+            if count[0] % 200 == 0:
+                out.flush()
+                print(f"본문 {count[0]}/{len(todo)}", flush=True)
+
+    with open(out_path, "a", encoding="utf-8") as out, ThreadPoolExecutor(workers) as ex:
+        list(ex.map(work, todo))
+    print(f"본문 수집 완료 {count[0]}건", flush=True)
+
+
+def refill_empty(gallery_id, path, gallery_type=None, workers=2, delay=1.0):
+    """본문이 빈 글만 다시 받아 path 를 갱신한다."""
+    from concurrent.futures import ThreadPoolExecutor
+    import threading
+
+    with open(path, encoding="utf-8") as f:
+        posts = [json.loads(line) for line in f if line.strip()]
+    todo = [p for p in posts if not p.get("body")]
+    print(f"빈 본문 재수집 대상 {len(todo)}건", flush=True)
+    local = threading.local()
+    count = [0]
+    lock = threading.Lock()
+
+    def work(p):
+        if not hasattr(local, "client"):
+            local.client = DCClient(gallery_id, gallery_type or "mgallery", delay)
+        try:
+            p["body"] = local.client.fetch_body(p["no"])
+        except RuntimeError:
+            pass
+        with lock:
+            count[0] += 1
+            if count[0] % 200 == 0:
+                print(f"재수집 {count[0]}/{len(todo)}", flush=True)
+
+    with ThreadPoolExecutor(workers) as ex:
+        list(ex.map(work, todo))
+    with open(path, "w", encoding="utf-8") as f:
+        for p in posts:
+            f.write(json.dumps(p, ensure_ascii=False) + "\n")
+    print(f"재수집 완료, 남은 빈 본문 {sum(1 for p in posts if not p.get('body'))}건", flush=True)
