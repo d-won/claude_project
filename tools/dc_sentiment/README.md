@@ -20,7 +20,9 @@ python run.py report --in data/posts.jsonl --since 2024-10-01 --until 2026-09-30
     --labels results/labels_all.tsv --out results
 ```
 
-2026-09-26 실행 결과 요약은 [`results/SUMMARY.md`](results/SUMMARY.md)에 있습니다.
+Reddit 수집: `python reddit.py collect --only GrandSeikos --out data/reddit_gs.jsonl`, `python reddit.py windows --sub Watches` (대형 서브는 월 단위 병렬 전수).
+
+2026-09-26 실행 결과 요약은 [`results/SUMMARY.md`](results/SUMMARY.md), Reddit 비교는 [`results/REDDIT_SUMMARY.md`](results/REDDIT_SUMMARY.md)에 있습니다.
 
 갤러리 종류(일반/마이너/미니)는 자동 감지합니다. 강제하려면 `--gallery-type mgallery` 등을 지정하세요.
 

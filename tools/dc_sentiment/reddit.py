@@ -97,6 +97,48 @@ def collect(out_path: str, since: str, until: str | None = None, only: list[str]
             print(f"[{kind} r/{sub}] {n}건", flush=True)
 
 
+def collect_windows(sub: str, start: str, end: str, out_dir: str, workers: int = 4):
+    """활동량 많은 서브용: 월 단위 구간을 병렬로 받는다. 구간별 파일이라 재실행 시 완료 구간은 건너뛴다."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    os.makedirs(out_dir, exist_ok=True)
+    s = datetime.fromisoformat(start).replace(tzinfo=timezone.utc)
+    e = datetime.fromisoformat(end).replace(tzinfo=timezone.utc)
+    windows = []
+    while s < e:
+        n = (s.replace(day=1) + __import__("datetime").timedelta(days=32)).replace(day=1)
+        windows.append((s, min(n, e)))
+        s = n
+
+    def work(w):
+        a, b = w
+        path = os.path.join(out_dir, f"{sub}_{a:%Y%m%d}.jsonl")
+        if os.path.exists(path + ".done"):
+            return
+        after, n = int(a.timestamp()), 0
+        with open(path, "w", encoding="utf-8") as out:
+            while True:
+                rows = _get("posts/search", {"subreddit": sub, "after": after, "before": int(b.timestamp()),
+                                             "limit": "auto", "sort": "asc", "fields": FIELDS["post"]})
+                if not rows:
+                    break
+                for r in rows:
+                    r["kind"] = "post"
+                    out.write(json.dumps(r, ensure_ascii=False) + "\n")
+                n += len(rows)
+                last = max(int(r["created_utc"]) for r in rows)
+                if last <= after:
+                    break
+                after = last
+                time.sleep(1)
+        open(path + ".done", "w").write(str(n))
+        print(f"[r/{sub}] {a:%Y-%m} {n}건", flush=True)
+
+    with ThreadPoolExecutor(workers) as ex:
+        list(ex.map(work, windows))
+    print(f"[r/{sub}] 전체 완료", flush=True)
+
+
 def quarter(ts: int) -> str:
     d = datetime.fromtimestamp(int(ts), timezone.utc)
     return f"{d.year}Q{(d.month - 1) // 3 + 1}"
@@ -156,6 +198,12 @@ def main():
     c.add_argument("--out", default="data/reddit.jsonl")
     c.add_argument("--since", default="2024-10-01")
     c.add_argument("--only", nargs="+", help="수집할 서브레딧만 지정")
+    w = sub.add_parser("windows")
+    w.add_argument("--sub", default="Watches")
+    w.add_argument("--start", default="2024-11-15")
+    w.add_argument("--end", default="2026-09-28")
+    w.add_argument("--out-dir", default="data/reddit_watches")
+    w.add_argument("--workers", type=int, default=4)
     sub.add_parser("ping")
     r = sub.add_parser("report")
     r.add_argument("--in", dest="inp", default="data/reddit.jsonl")
@@ -169,6 +217,8 @@ def main():
     a = ap.parse_args()
     if a.cmd == "collect":
         collect(a.out, a.since, only=a.only)
+    elif a.cmd == "windows":
+        collect_windows(a.sub, a.start, a.end, a.out_dir, a.workers)
     elif a.cmd == "ping":
         print("OK" if ping() else "DOWN")
     elif a.cmd == "report":
