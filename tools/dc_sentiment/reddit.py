@@ -2,7 +2,7 @@
 
 reddit.com 은 클라우드 IP 를 403/429 로 막기 때문에 공개 아카이브인 Arctic Shift 를 쓴다.
   - r/GrandSeiko : 서브 전체가 그세 이야기 → 글 전수
-  - r/Watches    : 'grand seiko' 가 제목·본문에 있는 글 + 본문에 있는 댓글
+  - r/Watches    : 글 전수 수집 후 'grand seiko' 언급 글만 사용 (댓글은 규모상 제외)
 
 사용 예:
     python reddit.py collect --out data/reddit.jsonl --since 2024-10-01
@@ -26,8 +26,8 @@ MENTION_RE = re.compile(r"grand\s*seiko|\bGS\s?(?:SBG|SLG)|\bSBG[A-Z]\d{3}|\bSLG
 # (종류, 서브레딧, 검색 파라미터) — 검색 파라미터가 없으면 서브 전수
 TARGETS = [
     ("post", "GrandSeiko", {}),
-    ("post", "Watches", {"query": "grand seiko"}),
-    ("comment", "Watches", {"body": "grand seiko"}),
+    # r/Watches 는 활동량이 많아 아카이브의 키워드 검색이 지원되지 않는다 → 글 전수 수집 후 로컬 필터
+    ("post", "Watches", {}),
 ]
 FIELDS = {
     "post": "id,created_utc,title,selftext,score,num_comments,subreddit,link_flair_text",
