@@ -1,7 +1,7 @@
 """Reddit 수집기 (Arctic Shift 아카이브 API).
 
 reddit.com 은 클라우드 IP 를 403/429 로 막기 때문에 공개 아카이브인 Arctic Shift 를 쓴다.
-  - r/GrandSeiko : 서브 전체가 그세 이야기 → 글 전수
+  - r/GrandSeikos: 서브 전체가 그세 이야기 → 글 전수
   - r/Watches    : 글 전수 수집 후 'grand seiko' 언급 글만 사용 (댓글은 규모상 제외)
 
 사용 예:
@@ -25,7 +25,8 @@ MENTION_RE = re.compile(r"grand\s*seiko|\bGS\s?(?:SBG|SLG)|\bSBG[A-Z]\d{3}|\bSLG
 
 # (종류, 서브레딧, 검색 파라미터) — 검색 파라미터가 없으면 서브 전수
 TARGETS = [
-    ("post", "GrandSeiko", {}),
+    # r/GrandSeiko 는 글 52개짜리 제한 서브, 실제 커뮤니티는 r/GrandSeikos(구독 6만)
+    ("post", "GrandSeikos", {}),
     # r/Watches 는 활동량이 많아 아카이브의 키워드 검색이 지원되지 않는다 → 글 전수 수집 후 로컬 필터
     ("post", "Watches", {}),
 ]
@@ -58,7 +59,7 @@ def ping() -> bool:
         return False
 
 
-def collect(out_path: str, since: str, until: str | None = None):
+def collect(out_path: str, since: str, until: str | None = None, only: list[str] | None = None):
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     seen = set()
     if os.path.exists(out_path):
@@ -66,6 +67,8 @@ def collect(out_path: str, since: str, until: str | None = None):
             seen = {(json.loads(l)["kind"], json.loads(l)["id"]) for l in f if l.strip()}
     with open(out_path, "a", encoding="utf-8") as out:
         for kind, sub, extra in TARGETS:
+            if only and sub not in only:
+                continue
             after = int(datetime.fromisoformat(since).replace(tzinfo=timezone.utc).timestamp())
             before = until
             n = 0
@@ -152,6 +155,7 @@ def main():
     c = sub.add_parser("collect")
     c.add_argument("--out", default="data/reddit.jsonl")
     c.add_argument("--since", default="2024-10-01")
+    c.add_argument("--only", nargs="+", help="수집할 서브레딧만 지정")
     sub.add_parser("ping")
     r = sub.add_parser("report")
     r.add_argument("--in", dest="inp", default="data/reddit.jsonl")
@@ -164,7 +168,7 @@ def main():
     s.add_argument("--seed", type=int, default=42)
     a = ap.parse_args()
     if a.cmd == "collect":
-        collect(a.out, a.since)
+        collect(a.out, a.since, only=a.only)
     elif a.cmd == "ping":
         print("OK" if ping() else "DOWN")
     elif a.cmd == "report":
